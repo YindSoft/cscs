@@ -378,8 +378,9 @@ namespace SplitAndMerge
                     return "";
                 }
             }
-            catch (Exception)
+            catch (Exception exc)
             {
+                Console.WriteLine("ProcessRepl Exception: " + exc); 
                 return ""; // The exception was already thrown and sent back.
             }
             finally
@@ -466,7 +467,9 @@ namespace SplitAndMerge
             //int endPointer = m_debugging.Pointer;
             //processed = m_debugging.Substr(startPointer, endPointer - startPointer);
 
-            return Completed(m_debugging) || (ProcessingBlock && endGroupRead > 0);
+            return Completed(m_debugging) || (ProcessingBlock && endGroupRead > 0) ||
+                   LastResult.Type == Variable.VarType.CONTINUE ||
+                   LastResult.IsReturn;
         }
 
         public static void ProcessException(ParsingScript script, ParsingException exc)
@@ -548,7 +551,8 @@ namespace SplitAndMerge
             await StepIn(stepInScript);
 
             ProcessingBlock = false;
-            done = stepInScript.Pointer >= tempScript.Pointer;
+            done = stepInScript.Pointer >= tempScript.Pointer ||
+                LastResult.IsReturn;
 
             doneEvent(done);
             return LastResult;
